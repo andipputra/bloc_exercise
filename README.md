@@ -1,4 +1,4 @@
-# day_22_riverpod_exercise
+# bloc_exercise
 
 A new Flutter project.
 

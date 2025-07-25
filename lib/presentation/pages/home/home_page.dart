@@ -1,43 +1,45 @@
-import 'package:day_22_riverpod_exercise/presentation/pages/authentication/authentication_page.dart';
-import 'package:day_22_riverpod_exercise/presentation/view_models/authentication/authentication_view_model.dart';
+import 'package:bloc_exercise/presentation/bloc/bloc/authentication_bloc.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
-class HomePage extends ConsumerWidget {
+class HomePage extends StatelessWidget {
   const HomePage({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    ref.listen(authenticationViewModelProvider, (previous, next) {
-      if (next.isLoading) {
-        showDialog(
-          context: context,
-          builder: (context) => Center(child: CircularProgressIndicator()),
-        );
-      } else {
-        final canPop = Navigator.canPop(context);
-        if (canPop) {
-          Navigator.pop(context);
-        }
-      }
-    });
-
-    final authState = ref.watch(authenticationViewModelProvider);
-
-    final user = authState.value;
-
+  Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: Text('Home Page')),
       body: Center(
-        child: user == null
-            ? GoToLoginButton()
-            : UserInfo(
-                user: user,
-                onLogout: ref
-                    .read(authenticationViewModelProvider.notifier)
-                    .logout,
-              ),
+        child: BlocConsumer<AuthenticationBloc, AuthenticationState>(
+          builder: (context, state) {
+            if (state is AuthenticationAuthenticated) {
+              return UserInfo(
+                user: state.user,
+                onLogout: () {
+                  context.read<AuthenticationBloc>().add(LogoutEvent());
+                },
+              );
+            }
+
+            return GoToLoginButton();
+          },
+          listener: (context, state) {
+            if (state is AuthenticationLoading) {
+              showDialog(
+                context: context,
+                barrierDismissible: false,
+                builder: (context) =>
+                    const Center(child: CircularProgressIndicator()),
+              );
+            } else {
+              Navigator.of(context).pop();
+            }
+          },
+          listenWhen: (previous, current) =>
+              current is AuthenticationLoading ||
+              previous is AuthenticationLoading,
+        ),
       ),
     );
   }
@@ -50,9 +52,7 @@ class GoToLoginButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return ElevatedButton(
       onPressed: () {
-        Navigator.of(
-          context,
-        ).push(MaterialPageRoute(builder: (context) => AuthenticationPage()));
+        Navigator.of(context).pushNamed('/auth');
       },
       child: Text('Go to Login'),
     );
@@ -72,10 +72,7 @@ class UserInfo extends StatelessWidget {
       children: [
         Text('User Email: ${user.email}'),
         Text('User UID: ${user.uid}'),
-        ElevatedButton(
-          onPressed: onLogout,
-          child: Text('Logout'),
-        ),
+        ElevatedButton(onPressed: onLogout, child: Text('Logout')),
       ],
     );
   }

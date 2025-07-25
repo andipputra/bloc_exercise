@@ -1,15 +1,31 @@
-import 'package:day_22_riverpod_exercise/firebase_options.dart';
-import 'package:day_22_riverpod_exercise/presentation/pages/home/home_page.dart';
+import 'package:bloc_exercise/firebase_options.dart';
+import 'package:bloc_exercise/presentation/bloc/bloc/authentication_bloc.dart';
+import 'package:bloc_exercise/presentation/pages/authentication/authentication_page.dart';
+import 'package:bloc_exercise/presentation/pages/home/home_page.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
-  runApp(ProviderScope(child: const MyApp()));
+  runApp(
+    MultiRepositoryProvider(
+      providers: [RepositoryProvider.value(value: FirebaseAuth.instance)],
+      child: MultiBlocProvider(
+        providers: [
+          BlocProvider(
+            create: (context) =>
+                AuthenticationBloc(firebaseAuth: context.read<FirebaseAuth>()),
+          ),
+        ],
+        child: const MyApp(),
+      ),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
@@ -38,7 +54,11 @@ class MyApp extends StatelessWidget {
         // tested with just a hot reload.
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
       ),
-      home: HomePage(),
+      initialRoute: '/',
+      routes: {
+        '/': (context) => const HomePage(),
+        '/auth': (context) => const AuthenticationPage(),
+      },
     );
   }
 }
