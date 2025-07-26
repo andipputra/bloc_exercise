@@ -1,5 +1,5 @@
 import 'package:bloc_exercise/core/enum/auth_type.dart';
-import 'package:bloc_exercise/presentation/bloc/bloc/authentication_bloc.dart';
+import 'package:bloc_exercise/presentation/bloc/authentication_bloc/authentication_bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -40,14 +40,12 @@ class _AuthenticationPageState extends State<AuthenticationPage> {
             builder: (context) =>
                 const Center(child: CircularProgressIndicator()),
           );
-        } else if (state is AuthenticationAuthenticated ||
-            state is AuthenticationError) {
-          Navigator.of(context).pop();
         }
-
         if (state is AuthenticationAuthenticated) {
           Navigator.of(context).popUntil((route) => route.settings.name == '/');
         } else if (state is AuthenticationError) {
+          Navigator.of(context).pop();
+
           ScaffoldMessenger.of(
             context,
           ).showSnackBar(SnackBar(content: Text(state.message)));

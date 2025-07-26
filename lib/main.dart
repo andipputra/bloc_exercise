@@ -1,5 +1,5 @@
 import 'package:bloc_exercise/firebase_options.dart';
-import 'package:bloc_exercise/presentation/bloc/bloc/authentication_bloc.dart';
+import 'package:bloc_exercise/presentation/bloc/authentication_bloc/authentication_bloc.dart';
 import 'package:bloc_exercise/presentation/pages/authentication/authentication_page.dart';
 import 'package:bloc_exercise/presentation/pages/home/home_page.dart';
 import 'package:firebase_auth/firebase_auth.dart';
